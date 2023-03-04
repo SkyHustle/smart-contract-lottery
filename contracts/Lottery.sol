@@ -19,6 +19,9 @@ contract Lottery is VRFConsumerBaseV2 {
     uint32 private immutable i_callbackGasLimit;
     uint32 private constant NUM_WORDS = 1;
 
+    /* Lottery Variables */
+    address private s_recentWinner;
+
     /* Events */
     event LotteryEnter(address indexed player);
     event RequestLotteryWinner(uint256 indexed requestId);
@@ -50,8 +53,6 @@ contract Lottery is VRFConsumerBaseV2 {
     // can only be called from outside of this contract
     function requestRandomWinner() external {
         // Request random number
-        // do something with it when we get it back
-        // 2 tx process
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_keyHash, // gasLane max gas price willing to pay for request in wei
             i_subId, // subscription for funding requests
@@ -63,10 +64,11 @@ contract Lottery is VRFConsumerBaseV2 {
     }
 
     // overide this function we get directly from VRFConsumerBaseV2
-    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords)
-        internal
-        override
-    {}
+    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
+        uint256 indexOfWinner = randomWords[0] % s_players.length;
+        address payable recentWinner = s_players[indexOfWinner];
+        s_recentWinner = recentWinner;
+    }
 
     /* Getter / View functions */
     function getEntranceFee() public view returns (uint256) {
@@ -75,5 +77,9 @@ contract Lottery is VRFConsumerBaseV2 {
 
     function getPlayer(uint256 index) public view returns (address) {
         return s_players[index];
+    }
+
+    function getRecentWinner() public view returns (address) {
+        return s_recentWinner;
     }
 }

@@ -3,6 +3,7 @@
 pragma solidity ^0.8.7;
 
 error Lottery__NotEnoughETHEntered();
+error Lottery__TransferFailed();
 
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
@@ -25,6 +26,7 @@ contract Lottery is VRFConsumerBaseV2 {
     /* Events */
     event LotteryEnter(address indexed player);
     event RequestLotteryWinner(uint256 indexed requestId);
+    event WinnerPicked(address indexed winner);
 
     constructor(
         address vrfCoordinatorV2,
@@ -64,10 +66,18 @@ contract Lottery is VRFConsumerBaseV2 {
     }
 
     // overide this function we get directly from VRFConsumerBaseV2
-    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
+    function fulfillRandomWords(
+        uint256, /* requestId */
+        uint256[] memory randomWords
+    ) internal override {
         uint256 indexOfWinner = randomWords[0] % s_players.length;
         address payable recentWinner = s_players[indexOfWinner];
         s_recentWinner = recentWinner;
+        (bool success, ) = recentWinner.call{value: address(this).balance}(""); // send winner entire contract balance, no data
+        if (!success) {
+            revert Lottery__TransferFailed();
+        }
+        emit WinnerPicked(recentWinner);
     }
 
     /* Getter / View functions */

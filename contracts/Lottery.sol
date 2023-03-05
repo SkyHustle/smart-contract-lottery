@@ -91,6 +91,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     // can only be called from outside of this contract
     function requestRandomWinner() external {
         // Request random number
+        s_lotteryState = LotteryState.CALCULATING;
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_keyHash, // gasLane max gas price willing to pay for request in wei
             i_subId, // subscription for funding requests
@@ -109,6 +110,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         uint256 indexOfWinner = randomWords[0] % s_players.length;
         address payable recentWinner = s_players[indexOfWinner];
         s_recentWinner = recentWinner;
+        s_lotteryState = LotteryState.OPEN;
         (bool success, ) = recentWinner.call{value: address(this).balance}(""); // send winner entire contract balance, no data
         if (!success) {
             revert Lottery__TransferFailed();

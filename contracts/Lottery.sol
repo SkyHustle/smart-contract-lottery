@@ -160,4 +160,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     function getNumerOfPlayers() public view returns (uint256) {
         return s_players.length;
     }
+
+    function getLatestTimeStamp() public view returns (uint256) {
+        return s_lastTimeStamp;
+    }
 }

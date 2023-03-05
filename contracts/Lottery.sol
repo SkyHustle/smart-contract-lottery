@@ -31,6 +31,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     /* Lottery Variables */
     address private s_recentWinner;
     LotteryState private s_lotteryState;
+    uint256 private s_lastTimeStamp;
+    uint256 private immutable i_interval;
 
     /* Events */
     event LotteryEnter(address indexed player);
@@ -42,7 +44,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         uint256 entranceFee,
         bytes32 keyHash,
         uint64 subId,
-        uint32 callbackGasLimit
+        uint32 callbackGasLimit,
+        uint256 interval
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
         i_entranceFee = entranceFee;
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
@@ -50,6 +53,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         i_subId = subId;
         i_callbackGasLimit = callbackGasLimit;
         s_lotteryState = LotteryState.OPEN;
+        s_lastTimeStamp = block.timestamp;
+        i_interval = interval;
     }
 
     function enterLottery() public payable {
@@ -79,7 +84,18 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
             bytes memory /* performData */
         )
     {
-        // We don't use the checkData in this example. The checkData is defined when the Upkeep was registered.
+        /* All these must be true
+          1. Lottery should be OPEN
+          2. Time interval should have passede
+          3. Lottery should have > 0 player
+          4. Subscription funded with LINK
+        */
+        bool isOpen = (LotteryState.OPEN == s_lotteryState);
+        bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_interval);
+        bool hasPlayers = (s_players.length > 0);
+        bool hasBalance = address(this).balance > 0;
+        upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBalance);
+        return (upkeepNeeded, "0x0");
     }
 
     function performUpkeep(

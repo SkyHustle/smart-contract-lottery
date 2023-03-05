@@ -111,6 +111,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         address payable recentWinner = s_players[indexOfWinner];
         s_recentWinner = recentWinner;
         s_lotteryState = LotteryState.OPEN;
+        s_players = new address payable[](0);
         (bool success, ) = recentWinner.call{value: address(this).balance}(""); // send winner entire contract balance, no data
         if (!success) {
             revert Lottery__TransferFailed();

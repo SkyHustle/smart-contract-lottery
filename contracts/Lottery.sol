@@ -20,19 +20,17 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
 
     /* State Variables */
     uint256 private immutable i_entranceFee;
-    address payable[] private s_players;
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
     bytes32 private immutable i_keyHash;
     uint64 private immutable i_subId;
-    uint16 private constant MINIMUM_REQUEST_CONFIRMATIONS = 3;
     uint32 private immutable i_callbackGasLimit;
+    uint256 private immutable i_interval;
+    uint16 private constant MINIMUM_REQUEST_CONFIRMATIONS = 3;
     uint32 private constant NUM_WORDS = 1;
-
-    /* Lottery Variables */
+    address payable[] private s_players;
     address private s_recentWinner;
     LotteryState private s_lotteryState;
     uint256 private s_lastTimeStamp;
-    uint256 private immutable i_interval;
 
     /* Events */
     event LotteryEnter(address indexed player);
@@ -52,9 +50,9 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         i_keyHash = keyHash;
         i_subId = subId;
         i_callbackGasLimit = callbackGasLimit;
+        i_interval = interval;
         s_lotteryState = LotteryState.OPEN;
         s_lastTimeStamp = block.timestamp;
-        i_interval = interval;
     }
 
     function enterLottery() public payable {
@@ -74,9 +72,9 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     // This is the func that Chainlink Keeper nodes call
     // they look for the 'upkeepNeeded to return true
     function checkUpkeep(
-        bytes calldata /* checkData */
+        bytes memory /* checkData */
     )
-        external
+        public
         view
         override
         returns (
@@ -101,6 +99,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     function performUpkeep(
         bytes calldata /* performData */
     ) external override {
+        // (bool upkeepNeeded, ) = checkUpkeep("");
         // Request random number
         s_lotteryState = LotteryState.CALCULATING;
         uint256 requestId = i_vrfCoordinator.requestRandomWords(

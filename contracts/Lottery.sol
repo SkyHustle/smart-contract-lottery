@@ -56,6 +56,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         s_lastTimeStamp = block.timestamp;
     }
 
+    /* Functions */
     function enterLottery() public payable {
         // storing error codes are more efficient than storing strings
         if (msg.value < i_entranceFee) {
@@ -145,5 +146,9 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
 
     function getRecentWinner() public view returns (address) {
         return s_recentWinner;
+    }
+
+    function getLotteryState() public view returns (LotteryState) {
+        return s_lotteryState;
     }
 }

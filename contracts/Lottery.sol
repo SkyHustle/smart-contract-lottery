@@ -152,9 +152,13 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         return s_lotteryState;
     }
 
-    // NUM_WORDS is part of the contract byte code, NOT in Storage
+    // CONSTANTS are part of the contract byte code, NOT in Storage
     function getNumWords() public pure returns (uint256) {
         return NUM_WORDS;
+    }
+
+    function getRequestConfirmations() public pure returns (uint256) {
+        return MINIMUM_REQUEST_CONFIRMATIONS;
     }
 
     function getNumerOfPlayers() public view returns (uint256) {

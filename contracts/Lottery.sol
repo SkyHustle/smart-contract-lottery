@@ -151,4 +151,9 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     function getLotteryState() public view returns (LotteryState) {
         return s_lotteryState;
     }
+
+    // NUM_WORDS is part of the contract byte code, NOT in Storage
+    function getNumWords() public pure returns (uint256) {
+        return NUM_WORDS;
+    }
 }

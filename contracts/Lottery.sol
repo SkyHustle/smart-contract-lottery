@@ -5,6 +5,7 @@ pragma solidity ^0.8.7;
 error Lottery__NotEnoughETHEntered();
 error Lottery__TransferFailed();
 error Lottery__NotOpen();
+error Lottery__UpkeepNotNeeded(uint256 currentBalance, uint256 numberOfPlayers, uint256 lotteryState);
 
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
@@ -38,8 +39,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     event WinnerPicked(address indexed winner);
 
     constructor(
-        address vrfCoordinatorV2,
         uint256 entranceFee,
+        address vrfCoordinatorV2,
         bytes32 keyHash,
         uint64 subId,
         uint32 callbackGasLimit,
@@ -99,7 +100,10 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     function performUpkeep(
         bytes calldata /* performData */
     ) external override {
-        // (bool upkeepNeeded, ) = checkUpkeep("");
+        (bool upkeepNeeded, ) = checkUpkeep("");
+        if (!upkeepNeeded) {
+            revert Lottery__UpkeepNotNeeded(address(this).balance, s_players.length, uint256(s_lotteryState));
+        }
         // Request random number
         s_lotteryState = LotteryState.CALCULATING;
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
@@ -122,6 +126,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         s_recentWinner = recentWinner;
         s_lotteryState = LotteryState.OPEN;
         s_players = new address payable[](0);
+        s_lastTimeStamp = block.timestamp;
         (bool success, ) = recentWinner.call{value: address(this).balance}(""); // send winner entire contract balance, no data
         if (!success) {
             revert Lottery__TransferFailed();

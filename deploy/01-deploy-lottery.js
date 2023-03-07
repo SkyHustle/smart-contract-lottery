@@ -1,4 +1,4 @@
-const { network } = require("hardhat")
+import { network } from "hardhat"
 
 export default async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments

@@ -1,12 +1,13 @@
 const { network, ethers } = require("hardhat")
+const { int } = require("hardhat/internal/core/params/argumentTypes")
 const { networkConfig, developmentChains } = require("../helper-hardhat-config")
 const { verify } = require("../utils/verify")
 
-const VRF_SUB_FUND_AMOUNT = ethers.utils.parseEther(3)
+const VRF_SUB_FUND_AMOUNT = ethers.utils.parseEther("3")
 
 module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments
-    const { deployer } = await getNamedAccounts
+    const { deployer } = await getNamedAccounts()
     const chainId = network.config.chainId
     let vrfCoordinatorV2Address, subId
 
@@ -17,7 +18,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         const transactionReceipt = await transactionResponse.wait(1)
         subId = transactionReceipt.events[0].args.subId
         // Fund the subcription, only need LINK on real network
-        await vrfCoordinatorV2Mock.fundSubcription(subId, VRF_SUB_FUND_AMOUNT)
+        await vrfCoordinatorV2Mock.fundSubscription(subId, VRF_SUB_FUND_AMOUNT)
     } else {
         // goerli
         vrfCoordinatorV2Address = networkConfig[chainId]["vrfCoordinatorV2"]
@@ -29,7 +30,8 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const callbackGasLimit = networkConfig[chainId]["callbackGasLimit"]
     const interval = networkConfig[chainId]["interval"]
 
-    const args = [vrfCoordinatorV2Address, entranceFee, keyHash, subId, callbackGasLimit, interval]
+    const args = [entranceFee, vrfCoordinatorV2Address, keyHash, subId, callbackGasLimit, interval]
+
     const lottery = await deploy("Lottery", {
         from: deployer,
         args: args,

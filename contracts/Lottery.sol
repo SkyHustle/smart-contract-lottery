@@ -26,7 +26,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     uint64 private immutable i_subId;
     uint32 private immutable i_callbackGasLimit;
     uint256 private immutable i_interval;
-    uint16 private constant MINIMUM_REQUEST_CONFIRMATIONS = 3;
+    uint16 private constant MINIMUM_REQUEST_CONFIRMATIONS = 3; // how many confirmations Chainlink node should wait before responding
     uint32 private constant NUM_WORDS = 1;
     address payable[] private s_players;
     address private s_recentWinner;
@@ -41,9 +41,9 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     constructor(
         uint256 entranceFee,
         address vrfCoordinatorV2,
-        bytes32 keyHash,
-        uint64 subId,
-        uint32 callbackGasLimit,
+        bytes32 keyHash, // gasLane max gas price willing to pay for request in wei
+        uint64 subId, // subscription for funding requests
+        uint32 callbackGasLimit, // how much gas to use for the callback to this function
         uint256 interval
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
         i_entranceFee = entranceFee;
@@ -108,10 +108,10 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         // Request random number
         s_lotteryState = LotteryState.CALCULATING;
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
-            i_keyHash, // gasLane max gas price willing to pay for request in wei
-            i_subId, // subscription for funding requests
-            MINIMUM_REQUEST_CONFIRMATIONS, // how many confirmations Chainlink node should wait before responding
-            i_callbackGasLimit, // how much gas to use for the callback to this function
+            i_keyHash,
+            i_subId,
+            MINIMUM_REQUEST_CONFIRMATIONS,
+            i_callbackGasLimit,
             NUM_WORDS
         );
         emit RequestLotteryWinner(requestId);

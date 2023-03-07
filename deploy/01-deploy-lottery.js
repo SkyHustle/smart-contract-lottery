@@ -1,5 +1,5 @@
 import { network, ethers } from "hardhat"
-import { networkConfig, developmentChains } from "../helper-hardhat-config"
+import { networkConfig, developmentChains, verify } from "../helper-hardhat-config"
 
 const VRF_SUB_FUND_AMOUNT = ethers.utils.parseEther(3)
 
@@ -28,10 +28,19 @@ export default async function ({ getNamedAccounts, deployments }) {
     const callbackGasLimit = networkConfig[chainId]["callbackGasLimit"]
     const interval = networkConfig[chainId]["interval"]
 
+    const args = [vrfCoordinatorV2Address, entranceFee, keyHash, subId, callbackGasLimit, interval]
     const lottery = await deploy("Lottery", {
         from: deployer,
-        args: [vrfCoordinatorV2Address, entranceFee, keyHash, subId, callbackGasLimit, interval],
+        args: args,
         log: true,
         waitConfirmations: network.config.blockConfirmations || 1,
     })
+
+    if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
+        log("Verifying Contract On Etherscan...")
+        await verify(lottery.address, args)
+    }
+    log("------------------------------------------------")
 }
+
+export const tags = ["all", "lottery"]

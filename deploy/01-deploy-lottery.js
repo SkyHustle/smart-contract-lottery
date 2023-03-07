@@ -25,10 +25,12 @@ export default async function ({ getNamedAccounts, deployments }) {
 
     const entranceFee = networkConfig[chainId]["entranceFee"]
     const keyHash = networkConfig[chainId]["keyHash"]
-    const args = [vrfCoordinatorV2Address, entranceFee, keyHash, subId]
+    const callbackGasLimit = networkConfig[chainId]["callbackGasLimit"]
+    const interval = networkConfig[chainId]["interval"]
+
     const lottery = await deploy("Lottery", {
         from: deployer,
-        args: args,
+        args: [vrfCoordinatorV2Address, entranceFee, keyHash, subId, callbackGasLimit, interval],
         log: true,
         waitConfirmations: network.config.blockConfirmations || 1,
     })

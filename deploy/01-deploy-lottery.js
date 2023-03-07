@@ -1,9 +1,10 @@
-import { network, ethers } from "hardhat"
-import { networkConfig, developmentChains, verify } from "../helper-hardhat-config"
+const { network, ethers } = require("hardhat")
+const { networkConfig, developmentChains } = require("../helper-hardhat-config")
+const { verify } = require("../utils/verify")
 
 const VRF_SUB_FUND_AMOUNT = ethers.utils.parseEther(3)
 
-export default async function ({ getNamedAccounts, deployments }) {
+module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments
     const { deployer } = await getNamedAccounts
     const chainId = network.config.chainId
@@ -43,4 +44,4 @@ export default async function ({ getNamedAccounts, deployments }) {
     log("------------------------------------------------")
 }
 
-export const tags = ["all", "lottery"]
+module.exports.tags = ["all", "lottery"]

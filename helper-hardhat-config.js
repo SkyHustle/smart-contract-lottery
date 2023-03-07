@@ -1,4 +1,4 @@
-import { ethers } from "hardhat"
+const { ethers } = require("hardhat")
 
 const networkConfig = {
     5: {
@@ -21,7 +21,7 @@ const networkConfig = {
 
 const developmentChains = ["hardhat", "localhost"]
 
-export default {
+module.exports = {
     networkConfig,
     developmentChains,
 }

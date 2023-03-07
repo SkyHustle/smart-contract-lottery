@@ -1,5 +1,5 @@
 import { developmentChains } from "../helper-hardhat-config"
-import { ethers } from "ethers"
+import { ethers } from "hardhat"
 
 const BASE_FEE = ethers.utils.parseEther("0.25") // 0.25 Link cost per request
 const GAS_PRICE_LINK = 1e9 // 1,000,000,000 // calculated value based on the gas price of the chain. Link per gas

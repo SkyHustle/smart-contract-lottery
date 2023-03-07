@@ -14,7 +14,8 @@ export default async function ({ getNamedAccounts, deployments }) {
         vrfCoordinatorV2Address = networkConfig[chainId]["vrfCoordinatorV2"]
     }
 
-    const args = []
+    const entranceFee = networkConfig[chainId]["entranceFee"]
+    const args = [vrfCoordinatorV2Address, entranceFee]
     const lottery = await deploy("Lottery", {
         from: deployer,
         args: args,

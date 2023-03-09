@@ -21,8 +21,10 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   // ideally 1 assert per "it" but we're gonna bend the rules
                   const lotteryState = await lottery.getLotteryState()
                   const lotteryInterval = await lottery.getInterval()
+                  const lotteryEntranceFee = await lottery.getEntranceFee()
                   assert.equal(lotteryState.toString(), "0")
                   assert.equal(lotteryInterval.toString(), networkConfig[chainId]["interval"])
+                  assert.equal(lotteryEntranceFee.toString(), networkConfig[chainId]["entranceFee"])
               })
           })
       })

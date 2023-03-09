@@ -152,6 +152,18 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         return s_lotteryState;
     }
 
+    function getNumerOfPlayers() public view returns (uint256) {
+        return s_players.length;
+    }
+
+    function getLatestTimeStamp() public view returns (uint256) {
+        return s_lastTimeStamp;
+    }
+
+    function getInterval() public view returns (uint256) {
+        return i_interval;
+    }
+
     // CONSTANTS are part of the contract byte code, NOT in Storage
     function getNumWords() public pure returns (uint256) {
         return NUM_WORDS;
@@ -159,13 +171,5 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
 
     function getRequestConfirmations() public pure returns (uint256) {
         return MINIMUM_REQUEST_CONFIRMATIONS;
-    }
-
-    function getNumerOfPlayers() public view returns (uint256) {
-        return s_players.length;
-    }
-
-    function getLatestTimeStamp() public view returns (uint256) {
-        return s_lastTimeStamp;
     }
 }

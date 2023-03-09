@@ -5,7 +5,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 // only run tests on development chain
 !developmentChains.includes(network.name)
     ? describe.skip
-    : describe("Lottery Unit Tests", async function () {
+    : describe("Lottery Unit Tests", function () {
           let lottery, vrfCoordinatorV2Mock, lotteryEntranceFee, deployer, interval
           const chainId = network.config.chainId
 
@@ -18,7 +18,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               interval = await lottery.getInterval()
           })
 
-          describe("constructor", async function () {
+          describe("constructor", function () {
               it("initialized the lottery correcty", async function () {
                   // ideally 1 assert per "it" but we're gonna bend the rules
                   const lotteryState = await lottery.getLotteryState()
@@ -30,7 +30,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               })
           })
 
-          describe("enterLottery", async function () {
+          describe("enterLottery", function () {
               it("reverts when you don't pay enough", async function () {
                   await expect(lottery.enterLottery()).to.be.revertedWith("Lottery__NotEnoughETHEntered")
               })
@@ -55,7 +55,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               })
           })
 
-          describe("checkUpkeep", async function () {
+          describe("checkUpkeep", function () {
               it("returns false if people haven't sent any ETH", async function () {
                   await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
                   await network.provider.send("evm_mine", [])

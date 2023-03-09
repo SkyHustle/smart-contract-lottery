@@ -1,12 +1,13 @@
 const { assert } = require("chai")
 const { getNamedAccounts, deployments, ethers } = require("hardhat")
-const { developmentChains } = require("../../helper-hardhat-config")
+const { developmentChains, networkConfig } = require("../../helper-hardhat-config")
 
 // only run tests on development chain
 !developmentChains.includes(network.name)
     ? describe.skip
     : describe("Lottery Unit Tests", async function () {
           let lottery, vrfCoordinatorV2Mock
+          const chainId = network.config.chainId
 
           beforeEach(async function () {
               const { deployer } = await getNamedAccounts()
@@ -17,9 +18,11 @@ const { developmentChains } = require("../../helper-hardhat-config")
 
           describe("constructor", async function () {
               it("initialized the lottery correcty", async function () {
-                  // ideally 1 assert per "it"
+                  // ideally 1 assert per "it" but we're gonna bend the rules
                   const lotteryState = await lottery.getLotteryState()
-                  assert.equal(lotteryState, 0)
+                  const lotteryInterval = await lottery.getInterval()
+                  assert.equal(lotteryState.toString(), "0")
+                  assert.equal(lotteryInterval.toString(), networkConfig[chainId]["interval"])
               })
           })
       })

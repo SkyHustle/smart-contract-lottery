@@ -6,7 +6,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 !developmentChains.includes(network.name)
     ? describe.skip
     : describe("Lottery Unit Tests", async function () {
-          let lottery, vrfCoordinatorV2Mock, lotteryEntranceFee, deployer
+          let lottery, vrfCoordinatorV2Mock, lotteryEntranceFee, deployer, interval
           const chainId = network.config.chainId
 
           beforeEach(async function () {
@@ -15,6 +15,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               lottery = await ethers.getContract("Lottery", deployer)
               vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock", deployer)
               lotteryEntranceFee = await lottery.getEntranceFee()
+              interval = await lottery.getInterval()
           })
 
           describe("constructor", async function () {
@@ -41,6 +42,16 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               it("emits event on enter", async function () {
                   // .emit is a waffle chai matcher
                   await expect(lottery.enterLottery({ value: lotteryEntranceFee })).to.emit(lottery, "LotteryEnter")
+              })
+              it("reverts when lottery is calculating", async function () {
+                  await lottery.enterLottery({ value: lotteryEntranceFee })
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  await network.provider.send("evm_mine", [])
+                  // pretend to be a Chainlink Keeper
+                  await lottery.performUpkeep([])
+                  await expect(lottery.enterLottery({ value: lotteryEntranceFee })).to.be.revertedWith(
+                      "Lottery__NotOpen"
+                  )
               })
           })
       })

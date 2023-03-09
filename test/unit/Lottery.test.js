@@ -1,4 +1,4 @@
-const { assert } = require("chai")
+const { assert, expect } = require("chai")
 const { getNamedAccounts, deployments, ethers } = require("hardhat")
 const { developmentChains, networkConfig } = require("../../helper-hardhat-config")
 
@@ -25,6 +25,12 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   assert.equal(lotteryState.toString(), "0")
                   assert.equal(lotteryInterval.toString(), networkConfig[chainId]["interval"])
                   assert.equal(lotteryEntranceFee.toString(), networkConfig[chainId]["entranceFee"])
+              })
+          })
+
+          describe("enterLottery", async function () {
+              it("reverts when you don't pay enough", async function () {
+                  await expect(lottery.enterLottery()).to.be.revertedWith("Lottery__NotEnoughETHEntered")
               })
           })
       })

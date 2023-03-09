@@ -107,6 +107,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         }
         // Request random number
         s_lotteryState = LotteryState.CALCULATING;
+        // this emits an event
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_keyHash,
             i_subId,
@@ -114,6 +115,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
             i_callbackGasLimit,
             NUM_WORDS
         );
+        // this is redundant, since we could use requestid from i_vrfCoordinator
         emit RequestLotteryWinner(requestId);
     }
 

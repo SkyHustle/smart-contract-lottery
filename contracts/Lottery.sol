@@ -86,7 +86,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     {
         /* All these must be true
           1. Lottery should be OPEN
-          2. Time interval should have passede
+          2. Time interval should have passed
           3. Lottery should have > 0 player
           4. Subscription funded with LINK
         */

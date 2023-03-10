@@ -124,5 +124,53 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                       "nonexistent request"
                   )
               })
+              it("picks a winner, resets the lottery, and sends money to the winner", async function () {
+                  const additionalEntrants = 3
+                  const startingAccountIndex = 1 // deployer = 0
+                  const accounts = await ethers.getSigners()
+                  for (i = startingAccountIndex; i < startingAccountIndex + additionalEntrants; i++) {
+                      const accountConnectedLottery = lottery.connect(accounts[i])
+                      await accountConnectedLottery.enterLottery({ value: lotteryEntranceFee })
+                  }
+                  const startingTimeStamp = await lottery.getLatestTimeStamp()
+                  // perfromUpkeep (mock being ChainLink Keepers)
+                  // fulfillRandomWords (mock being the ChainLink VRF)
+                  // on proper testnet we have to wait for the fulfillRandomWords to be executed
+                  await new Promise(async (resolve, reject) => {
+                      lottery.once("WinnerPicked", async () => {
+                          try {
+                              const recentWinner = await lottery.getRecentWinner()
+                              console.log("Deployer ", deployer)
+                              console.log("Recent Winner: ", recentWinner)
+                              console.log(accounts[0].address)
+                              console.log(accounts[1].address)
+                              console.log(accounts[2].address)
+                              console.log(accounts[3].address)
+                              const lotteryState = await lottery.getLotteryState()
+                              const endingTimeStamp = await lottery.getLatestTimeStamp()
+                              const players = await lottery.getNumberOfPlayers()
+                              const winnerEndingBalance = await accounts[1].getBalance()
+                              assert.equal(players, 0)
+                              assert.equal(lotteryState, 0)
+                              assert(endingTimeStamp > startingTimeStamp)
+                              assert.equal(
+                                  winnerEndingBalance.toString(),
+                                  winnerStartingBalance.add(
+                                      lotteryEntranceFee.mul(additionalEntrants).add(lotteryEntranceFee).toString()
+                                  )
+                              )
+                          } catch (error) {
+                              reject(error)
+                          }
+                          resolve()
+                      })
+                      // Setting up the listener
+                      // below, we will fire the event, and the listener will pick it up and resolve
+                      const tx = await lottery.performUpkeep([])
+                      const txReceipt = await tx.wait(1)
+                      const winnerStartingBalance = await accounts[1].getBalance()
+                      await vrfCoordinatorV2Mock.fulfillRandomWords(txReceipt.events[1].args.requestId, lottery.address)
+                  })
+              })
           })
       })

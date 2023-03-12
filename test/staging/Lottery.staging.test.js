@@ -15,9 +15,11 @@ developmentChains.includes(network.name)
 
           describe("fulfillRandomWords", function () {
               it("works with live ChainLink Keepers, VRF, and provides a random winner", async function () {
+                  console.log("Setting up test...")
                   const startingTimeStamp = await lottery.getLatestTimeStamp()
                   const accounts = await ethers.getSigners()
-                  // setup listener before we enter lottery
+
+                  console.log("Setting up Listener...")
                   await new Promise(async (resolve, reject) => {
                       lottery.once("WinnerPicked", async () => {
                           console.log("Winner Picked, Event Fired")
@@ -43,8 +45,11 @@ developmentChains.includes(network.name)
                           }
                           resolve()
                       })
-                      // Enter the lottery
-                      await lottery.enterLottery({ value: lotteryEntranceFee })
+                      // Then Enter the lottery
+                      console.log("Entering Lottery...")
+                      const tx = await lottery.enterLottery({ value: lotteryEntranceFee })
+                      await tx.wait(1)
+                      console.log("Time to wait...")
                       const winnerStartingBalance = await accounts[0].getBalance()
                   })
               })

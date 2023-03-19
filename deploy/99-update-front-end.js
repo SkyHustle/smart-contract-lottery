@@ -9,6 +9,7 @@ module.exports = async function () {
     if (process.env.UPDATE_FRONT_END) {
         console.log("Updating front end...")
         updateContractAddresses()
+        updateAbi()
     }
 }
 
@@ -24,6 +25,11 @@ async function updateContractAddresses() {
         currentAddresses[chainId] = [lottery.address]
     }
     fs.writeFileSync(FRONT_END_ADDRESSES_FILE, JSON.stringify(currentAddresses))
+}
+
+async function updateAbi() {
+    const lottery = await ethers.getContract("Lottery")
+    fs.writeFileSync(FRONT_END_ABI_FILE, lottery.interface.format(ethers.utils.FormatTypes.json))
 }
 
 module.exports.tags = ["all", "frontend"]

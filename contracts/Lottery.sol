@@ -75,15 +75,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     // they look for the 'upkeepNeeded to return true
     function checkUpkeep(
         bytes memory /* checkData */
-    )
-        public
-        view
-        override
-        returns (
-            bool upkeepNeeded,
-            bytes memory /* performData */
-        )
-    {
+    ) public view override returns (bool upkeepNeeded, bytes memory /* performData */) {
         /* All these must be true
           1. Lottery should be OPEN
           2. Time interval should have passed
@@ -98,9 +90,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
         return (upkeepNeeded, "0x0");
     }
 
-    function performUpkeep(
-        bytes calldata /* performData */
-    ) external override {
+    function performUpkeep(bytes calldata /* performData */) external override {
         (bool upkeepNeeded, ) = checkUpkeep("");
         if (!upkeepNeeded) {
             revert Lottery__UpkeepNotNeeded(address(this).balance, s_players.length, uint256(s_lotteryState));
@@ -120,10 +110,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatibleInterface {
     }
 
     // overide this function we get directly from VRFConsumerBaseV2
-    function fulfillRandomWords(
-        uint256, /* requestId */
-        uint256[] memory randomWords
-    ) internal override {
+    function fulfillRandomWords(uint256 /* requestId */, uint256[] memory randomWords) internal override {
         uint256 indexOfWinner = randomWords[0] % s_players.length;
         address payable recentWinner = s_players[indexOfWinner];
         s_recentWinner = recentWinner;
